@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "/proto";
+
+message UserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  bool active = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message UserResponse {
+  string token = 1;
+  User user = 2;
+}
+
+message UserValidated {
+  string token = 1;
+  string id = 2;
+  string email = 3;
+}
+
+message Jwt {
+  string token = 1;
+}
+
+
+service AuthService {
+  rpc CreateUser(UserRequest) returns (UserResponse);
+  rpc ValidateUser(UserRequest) returns (UserValidated);
+  rpc JwtParse(Jwt) returns (User);
+}

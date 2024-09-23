@@ -1,0 +1,57 @@
+version: '3.8'
+name: auth_app
+services:
+  server:
+    build: .
+    container_name: auth-server
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    networks:
+      - postgres_auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: "postgres"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres_auth
+    volumes:
+      - ./db/postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    env_file:
+      - .env
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "54321:80"
+    networks:
+      - postgres_auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  postgres_auth:
+    driver: bridge
+
+volumes:
+  postgres:
