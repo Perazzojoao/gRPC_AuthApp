@@ -6,6 +6,8 @@ services:
     container_name: auth-server
     env_file:
       - .env
+    environment:
+      - DB_HOST=postgres
     ports:
       - 8000:8000
     networks:

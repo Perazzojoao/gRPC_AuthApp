@@ -22,18 +22,10 @@ func Connect() (*gorm.DB, error) {
 	var counts int64
 	var backOff = 1 * time.Second
 	var connection *gorm.DB
-
-	host := "postgres"
-	if _, err := os.Stat(".env"); err == nil {
-		err = godotenv.Load()
-		if err != nil {
-			log.Panic(err.Error())
-		}
-		host = "localhost"
-	}
+	godotenv.Load()
 
 	dns := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable",
-		host,
+		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
