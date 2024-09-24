@@ -8,6 +8,8 @@ import (
 	"log"
 
 	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +26,7 @@ func (u *UserHandlers) CreateUser(user *dto.RequestUserDto) (*models.User, error
 	u.db.First(newUser, "email = ?", user.Email)
 
 	if newUser.Id != uuid.Nil {
-		return &models.User{}, errors.New("user already exists")
+		return &models.User{}, status.Error(codes.AlreadyExists, "user already exists")
 	}
 
 	var err error
@@ -44,7 +46,7 @@ func (u *UserHandlers) ValidateUser(user *dto.RequestUserDto) (*models.User, err
 	u.db.First(newUser, "email = ?", user.Email)
 
 	if newUser.Id == uuid.Nil {
-		return &models.User{}, errors.New("user not found")
+		return &models.User{}, status.Error(codes.NotFound, "user not found")
 	}
 
 	err := util.CompareHash(newUser.Password, user.Password)
