@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ type Server struct {
 	DB *gorm.DB
 }
 
-var GRpcPort = "8000"
+var gRPCPort string
 
 func NewServer() *Server {
 	db, err := db.Connect()
@@ -29,7 +30,9 @@ func NewServer() *Server {
 }
 
 func (app *Server) GrpcListen() {
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", GRpcPort))
+	gRPCPort = os.Getenv("GRPC_PORT")
+
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gRPCPort))
 	if err != nil {
 		log.Fatalf("failed to listen for gRpc: %v", err)
 	}
@@ -40,7 +43,7 @@ func (app *Server) GrpcListen() {
 		UserHandlers: user.NewUserHandlers(app.DB),
 		JwtHandler:   jwt.NewJwtHandler(app.DB),
 	})
-	log.Println("gRPC server started on port ", GRpcPort)
+	log.Println("gRPC server started on port ", gRPCPort)
 
 	if err := s.Serve(listen); err != nil {
 		log.Fatalf("failed to serve gRpc: %v", err)
