@@ -47,7 +47,7 @@ func (u *AuthService) CreateUser(ctx context.Context, req *proto.UserRequest) (*
 func (u *AuthService) ValidateUser(ctx context.Context, req *proto.UserRequest) (*proto.UserValidated, error) {
 	payload, err := dto.NewRequestUserDto(req.Email, req.Password)
 	if err != nil {
-		return &proto.UserValidated{}, err
+		return &proto.UserValidated{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	newUser, err := u.UserHandlers.ValidateUser(payload)

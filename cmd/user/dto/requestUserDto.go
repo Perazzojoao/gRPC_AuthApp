@@ -21,7 +21,7 @@ func NewRequestUserDto(email, password string) (*RequestUserDto, error) {
 		return nil, err
 	}
 
-	return &user, err
+	return &user, nil
 }
 
 func (u *RequestUserDto) Validate() error {
