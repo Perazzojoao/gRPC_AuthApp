@@ -3,6 +3,7 @@ package jwt
 import (
 	"authApp/models"
 	"authApp/util"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -22,13 +23,13 @@ func NewJwtHandler(db *gorm.DB) *JwtHandler {
 	return &JwtHandler{db: db}
 }
 
-func (j *JwtHandler) GenerateToken(user *models.User) string {
+func (j *JwtHandler) GenerateToken(user *models.User) (string, error) {
 	token, err := util.GenerateToken(user)
 	if err != nil {
-		log.Println("Could not generate jwt token: ", err)
-		return ""
+		newError := errors.New(fmt.Sprintf("could not generate token: %v", err))
+		return "", newError
 	}
-	return token
+	return token, nil
 }
 
 func (j *JwtHandler) ParseToken(tokenString string) (*models.User, error) {
