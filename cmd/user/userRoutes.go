@@ -5,6 +5,9 @@ import (
 	"authApp/cmd/user/dto"
 	"authApp/proto"
 	"context"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type AuthService struct {
@@ -16,15 +19,18 @@ type AuthService struct {
 func (u *AuthService) CreateUser(ctx context.Context, req *proto.UserRequest) (*proto.UserResponse, error) {
 	payload, err := dto.NewRequestUserDto(req.Email, req.Password)
 	if err != nil {
-		return nil, err
+		return &proto.UserResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	newUser, err := u.UserHandlers.CreateUser(payload)
 	if err != nil {
-		return nil, err
+		return &proto.UserResponse{}, err
 	}
 
-	token := u.JwtHandler.GenerateToken(newUser)
+	token, err := u.JwtHandler.GenerateToken(newUser)
+	if err != nil {
+		return &proto.UserResponse{}, status.Error(codes.Internal, err.Error())
+	}
 
 	return &proto.UserResponse{
 		Token: token,
@@ -41,15 +47,18 @@ func (u *AuthService) CreateUser(ctx context.Context, req *proto.UserRequest) (*
 func (u *AuthService) ValidateUser(ctx context.Context, req *proto.UserRequest) (*proto.UserValidated, error) {
 	payload, err := dto.NewRequestUserDto(req.Email, req.Password)
 	if err != nil {
-		return nil, err
+		return &proto.UserValidated{}, err
 	}
 
 	newUser, err := u.UserHandlers.ValidateUser(payload)
 	if err != nil {
-		return nil, err
+		return &proto.UserValidated{}, err
 	}
 
-	token := u.JwtHandler.GenerateToken(newUser)
+	token, err := u.JwtHandler.GenerateToken(newUser)
+	if err != nil {
+		return &proto.UserValidated{}, status.Error(codes.Internal, err.Error())
+	}
 
 	return &proto.UserValidated{
 		Token: token,
@@ -61,7 +70,7 @@ func (u *AuthService) ValidateUser(ctx context.Context, req *proto.UserRequest) 
 func (u *AuthService) JwtParse(ctx context.Context, req *proto.Jwt) (*proto.User, error) {
 	user, err := u.JwtHandler.ParseToken(req.Token)
 	if err != nil {
-		return nil, err
+		return &proto.User{}, err
 	}
 
 	return &proto.User{

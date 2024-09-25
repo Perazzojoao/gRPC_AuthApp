@@ -7,7 +7,6 @@ import (
 	"errors"
 	"log"
 
-	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -22,10 +21,10 @@ func NewUserHandlers(db *gorm.DB) *UserHandlers {
 }
 
 func (u *UserHandlers) CreateUser(user *dto.RequestUserDto) (*models.User, error) {
-	newUser := &models.User{Email: user.Email}
-	u.db.First(newUser, "email = ?", user.Email)
+	newUser := models.User{Email: user.Email}
+	result := u.db.First(&newUser, "email = ?", user.Email)
 
-	if newUser.Id != uuid.Nil {
+	if result.Error == nil {
 		return &models.User{}, status.Error(codes.AlreadyExists, "user already exists")
 	}
 
@@ -35,25 +34,27 @@ func (u *UserHandlers) CreateUser(user *dto.RequestUserDto) (*models.User, error
 		log.Println(err)
 	}
 
-	u.db.Create(newUser)
+	result = u.db.Create(&newUser)
+	if result.Error != nil {
+		return &models.User{}, status.Error(codes.Internal, "internal error")
+	}
 
-	return newUser, nil
+	return &newUser, nil
 
 }
 
 func (u *UserHandlers) ValidateUser(user *dto.RequestUserDto) (*models.User, error) {
-	newUser := &models.User{Email: user.Email}
-	u.db.First(newUser, "email = ?", user.Email)
+	newUser := models.User{Email: user.Email}
+	result := u.db.First(&newUser, "email = ?", user.Email)
 
-	if newUser.Id == uuid.Nil {
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return &models.User{}, status.Error(codes.NotFound, "user not found")
 	}
 
 	err := util.CompareHash(newUser.Password, user.Password)
 	if err != nil {
-		log.Println(err)
-		return &models.User{}, errors.New("invalid password")
+		return &models.User{}, status.Error(codes.Unauthenticated, "invalid password")
 	}
 
-	return newUser, nil
+	return &newUser, nil
 }
