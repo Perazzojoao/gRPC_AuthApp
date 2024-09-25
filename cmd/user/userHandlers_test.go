@@ -6,6 +6,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestCreateUser(t *testing.T) {
@@ -13,31 +16,37 @@ func TestCreateUser(t *testing.T) {
 		name    string
 		payload *proto.UserRequest
 		wantErr bool
+		expect  codes.Code
 	}{
 		{
 			name:    "Test 1",
 			payload: &proto.UserRequest{Email: "testgmail.com", Password: "password"},
 			wantErr: true,
+			expect:  codes.InvalidArgument,
 		},
 		{
 			name:    "Test 2",
 			payload: &proto.UserRequest{Email: "test@gmail.com", Password: "passw"},
 			wantErr: true,
+			expect:  codes.InvalidArgument,
 		},
 		{
 			name:    "Test 3",
 			payload: &proto.UserRequest{Email: "@gmail.com", Password: "password"},
 			wantErr: true,
+			expect:  codes.InvalidArgument,
 		},
 		{
 			name:    "Test 4",
 			payload: &proto.UserRequest{Email: "test@gmail.com", Password: "password"},
 			wantErr: false,
+			expect:  codes.OK,
 		},
 		{
 			name:    "Test 5",
 			payload: &proto.UserRequest{Email: "test@gmail.com", Password: "password"},
 			wantErr: true,
+			expect:  codes.AlreadyExists,
 		},
 	}
 
@@ -62,26 +71,31 @@ func TestLoginUser(t *testing.T) {
 		name    string
 		payload *proto.UserRequest
 		wantErr bool
+		expect  codes.Code
 	}{
 		{
 			name:    "Test 1",
 			payload: &proto.UserRequest{Email: "test1@gmail.com", Password: "password"},
 			wantErr: true,
+			expect:  codes.NotFound,
 		},
 		{
 			name:    "Test 2",
 			payload: &proto.UserRequest{Email: "test@gmail.com", Password: "password1"},
 			wantErr: true,
+			expect:  codes.Unauthenticated,
 		},
 		{
 			name:    "Test 3",
 			payload: &proto.UserRequest{Email: "test@gmail", Password: "password"},
 			wantErr: true,
+			expect:  codes.InvalidArgument,
 		},
 		{
 			name:    "Test 4",
 			payload: &proto.UserRequest{Email: "test@gmail.com", Password: "password"},
 			wantErr: false,
+			expect:  codes.OK,
 		},
 	}
 
@@ -97,11 +111,11 @@ func TestLoginUser(t *testing.T) {
 			defer wg.Done()
 			t.Run(tc.name, func(t *testing.T) {
 				response, err := authClient.ValidateUser(ctx, tc.payload)
-				if tc.wantErr && err == nil {
-					t.Errorf("expected error, got nil")
-				}
-				if !tc.wantErr && err != nil {
-					t.Errorf("expected no error, got %v", err)
+				errStatus, _ := status.FromError(err)
+				statusCode := errStatus.Code()
+
+				if tc.expect != statusCode {
+					t.Errorf("expected status code %v, got %v\n error message: %v", tc.expect, statusCode, err)
 				}
 
 				if response != nil {
@@ -126,21 +140,25 @@ func TestJwtParse(t *testing.T) {
 		name    string
 		payload *proto.Jwt
 		wantErr bool
+		expect  codes.Code
 	}{
 		{
 			name:    "Test 1",
 			payload: &proto.Jwt{},
 			wantErr: true,
+			expect:  codes.Unauthenticated,
 		},
 		{
 			name:    "Test 2",
 			payload: &proto.Jwt{Token: token + "1"},
 			wantErr: true,
+			expect:  codes.Unauthenticated,
 		},
 		{
 			name:    "Test 3",
 			payload: &proto.Jwt{Token: token},
 			wantErr: false,
+			expect:  codes.OK,
 		},
 	}
 
@@ -154,11 +172,11 @@ func TestJwtParse(t *testing.T) {
 			defer wg.Done()
 			t.Run(tc.name, func(t *testing.T) {
 				_, err := authClient.JwtParse(ctx, tc.payload)
-				if tc.wantErr && err == nil {
-					t.Errorf("expected error, got nil")
-				}
-				if !tc.wantErr && err != nil {
-					t.Errorf("expected no error, got %v", err)
+				errStatus, _ := status.FromError(err)
+				statusCode := errStatus.Code()
+
+				if tc.expect != statusCode {
+					t.Errorf("expected status code %v, got %v\n error message: %v", tc.expect, statusCode, err)
 				}
 			})
 		}()

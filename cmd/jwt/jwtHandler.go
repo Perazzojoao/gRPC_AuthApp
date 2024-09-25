@@ -5,7 +5,6 @@ import (
 	"authApp/util"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -35,7 +34,6 @@ func (j *JwtHandler) GenerateToken(user *models.User) (string, error) {
 func (j *JwtHandler) ParseToken(tokenString string) (*models.User, error) {
 	token, err := util.ParseToken(tokenString)
 	if err != nil {
-		log.Println("Could not parse jwt token: ", err)
 		return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("could not parse jwt token: %v", err))
 	}
 
