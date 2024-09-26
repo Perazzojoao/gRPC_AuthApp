@@ -1,8 +1,8 @@
 package server
 
 import (
-	"auth-service/api/jwt"
-	"auth-service/api/user"
+	"auth-service/api"
+	"auth-service/api/handlers"
 	"auth-service/postgres"
 	"auth-service/proto"
 	"fmt"
@@ -36,9 +36,9 @@ func (app *Server) GrpcListen() {
 	defer listen.Close()
 
 	s := grpc.NewServer()
-	proto.RegisterAuthServiceServer(s, &user.AuthService{
-		UserHandlers: user.NewUserHandlers(app.DB),
-		JwtHandler:   jwt.NewJwtHandler(app.DB),
+	proto.RegisterAuthServiceServer(s, &api.AuthService{
+		UserHandlers: handlers.NewUserHandlers(app.DB),
+		JwtHandler:   handlers.NewJwtHandler(app.DB),
 	})
 	log.Println("gRPC server started on port ", gRPCPort)
 

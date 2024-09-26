@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 	"log"
-	"mail-service/api/mail"
+	"mail-service/api"
 	"mail-service/proto"
 	"net"
 
@@ -26,7 +26,7 @@ func (srv *Server) GrpcListen() {
 	defer listen.Close()
 
 	s := grpc.NewServer()
-	proto.RegisterMailServiceServer(s, &mail.MailService{})
+	proto.RegisterMailServiceServer(s, &api.MailService{})
 	log.Println("gRPC server started on port ", gRPCPort)
 
 	if err := s.Serve(listen); err != nil {

@@ -1,7 +1,7 @@
-package user
+package api
 
 import (
-	"auth-service/api/jwt"
+	"auth-service/api/handlers"
 	"auth-service/client"
 	"auth-service/postgres"
 	"auth-service/proto"
@@ -16,7 +16,6 @@ import (
 )
 
 var authClient proto.AuthServiceClient
-var userLoggedIn *proto.UserValidated
 
 func TestAuthService(t *testing.T) {
 	// Load environment variables
@@ -39,8 +38,8 @@ func TestAuthService(t *testing.T) {
 	// -----------------------
 
 	asc := AuthService{
-		UserHandlers: NewUserHandlers(db),
-		JwtHandler:   jwt.NewJwtHandler(db),
+		UserHandlers: handlers.NewUserHandlers(db),
+		JwtHandler:   handlers.NewJwtHandler(db),
 	}
 	proto.RegisterAuthServiceServer(srv, &asc)
 
@@ -63,9 +62,7 @@ func TestAuthService(t *testing.T) {
 	authClient = proto.NewAuthServiceClient(conn)
 
 	// --- Tests ---
-	CreateUserTest(t)
-
-	LoginUserTest(t)
-
-	JwtParseTest(t)
+	handlers.CreateUserTest(authClient, t)
+	userLoggedIn := handlers.LoginUserTest(authClient, t)
+	handlers.JwtParseTest(authClient, userLoggedIn, t)
 }
