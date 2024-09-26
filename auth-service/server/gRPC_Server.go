@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -17,8 +16,6 @@ import (
 type Server struct {
 	DB *gorm.DB
 }
-
-var gRPCPort string
 
 func NewServer() *Server {
 	db, err := postgres.Connect()
@@ -30,7 +27,7 @@ func NewServer() *Server {
 }
 
 func (app *Server) GrpcListen() {
-	gRPCPort = os.Getenv("GRPC_PORT")
+	gRPCPort := "8000"
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gRPCPort))
 	if err != nil {

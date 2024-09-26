@@ -1,8 +1,8 @@
 package main
 
-import "auth-service/api/server"
+import "auth-service/server"
 
 func main() {
-	server := server.NewServer()
-	server.GrpcListen()
+	app := server.NewServer()
+	app.GrpcListen()
 }
