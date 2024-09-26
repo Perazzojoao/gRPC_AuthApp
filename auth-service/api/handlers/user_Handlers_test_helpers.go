@@ -1,4 +1,4 @@
-package user
+package handlers
 
 import (
 	"auth-service/proto"
@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func CreateUserTest(t *testing.T) {
+func CreateUserTest(authClient proto.AuthServiceClient, t *testing.T) {
 	t.Run("Create User", func(t *testing.T) {
 		tt := []struct {
 			name    string
@@ -68,7 +68,8 @@ func CreateUserTest(t *testing.T) {
 	})
 }
 
-func LoginUserTest(t *testing.T) {
+func LoginUserTest(authClient proto.AuthServiceClient, t *testing.T) *proto.UserValidated {
+	var userLoggedIn *proto.UserValidated
 	t.Run("Login User", func(t *testing.T) {
 		tt := []struct {
 			name    string
@@ -135,9 +136,10 @@ func LoginUserTest(t *testing.T) {
 		userLoggedIn = <-user
 		close(user)
 	})
+	return userLoggedIn
 }
 
-func JwtParseTest(t *testing.T) {
+func JwtParseTest(authClient proto.AuthServiceClient, userLoggedIn *proto.UserValidated, t *testing.T) {
 	t.Run("Parse JWT", func(t *testing.T) {
 		token := userLoggedIn.Token
 

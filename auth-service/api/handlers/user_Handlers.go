@@ -1,7 +1,7 @@
-package user
+package handlers
 
 import (
-	"auth-service/api/user/dto"
+	"auth-service/api/dto"
 	"auth-service/postgres/models"
 	"auth-service/util"
 	"errors"

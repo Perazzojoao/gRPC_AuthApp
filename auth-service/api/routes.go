@@ -1,8 +1,8 @@
-package user
+package api
 
 import (
-	"auth-service/api/jwt"
-	"auth-service/api/user/dto"
+	"auth-service/api/dto"
+	"auth-service/api/handlers"
 	"auth-service/proto"
 	"context"
 
@@ -12,8 +12,8 @@ import (
 
 type AuthService struct {
 	proto.UnimplementedAuthServiceServer
-	UserHandlers *UserHandlers
-	JwtHandler   *jwt.JwtHandler
+	UserHandlers *handlers.UserHandlers
+	JwtHandler   *handlers.JwtHandler
 }
 
 func (u *AuthService) CreateUser(ctx context.Context, req *proto.UserRequest) (*proto.UserResponse, error) {

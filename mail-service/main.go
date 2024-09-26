@@ -1,6 +1,6 @@
 package main
 
-import "auth-service/server"
+import "mail-service/server"
 
 func main() {
 	app := server.NewServer()

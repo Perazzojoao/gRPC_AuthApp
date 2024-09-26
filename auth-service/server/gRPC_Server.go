@@ -1,14 +1,13 @@
 package server
 
 import (
-	"auth-service/api/jwt"
-	"auth-service/api/user"
+	"auth-service/api"
+	"auth-service/api/handlers"
 	"auth-service/postgres"
 	"auth-service/proto"
 	"fmt"
 	"log"
 	"net"
-	"os"
 
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -17,8 +16,6 @@ import (
 type Server struct {
 	DB *gorm.DB
 }
-
-var gRPCPort string
 
 func NewServer() *Server {
 	db, err := postgres.Connect()
@@ -30,7 +27,7 @@ func NewServer() *Server {
 }
 
 func (app *Server) GrpcListen() {
-	gRPCPort = os.Getenv("GRPC_PORT")
+	gRPCPort := "8000"
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gRPCPort))
 	if err != nil {
@@ -39,9 +36,9 @@ func (app *Server) GrpcListen() {
 	defer listen.Close()
 
 	s := grpc.NewServer()
-	proto.RegisterAuthServiceServer(s, &user.AuthService{
-		UserHandlers: user.NewUserHandlers(app.DB),
-		JwtHandler:   jwt.NewJwtHandler(app.DB),
+	proto.RegisterAuthServiceServer(s, &api.AuthService{
+		UserHandlers: handlers.NewUserHandlers(app.DB),
+		JwtHandler:   handlers.NewJwtHandler(app.DB),
 	})
 	log.Println("gRPC server started on port ", gRPCPort)
 

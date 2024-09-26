@@ -1,4 +1,4 @@
-package jwt
+package handlers
 
 import (
 	"auth-service/postgres/models"
