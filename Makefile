@@ -1,5 +1,6 @@
 AUTH_BINARY=authApp.exe
 
+#1 ------------------------- Docker commands -------------------------
 ## up: starts all containers in the background without forcing build
 up:
 	@echo Starting Docker images...
@@ -20,6 +21,13 @@ down:
 	docker compose down
 	@echo Done!
 
+## clear: clear dungling docker images
+clear:
+	@echo Clearing dungling docker images...
+	docker image prune
+	@echo Done!
+
+#2 ------------------------- Auth build commands -------------------------
 ## proto_auth: generates auth proto files
 proto_auth:
 	@echo Generating auth proto...
@@ -27,16 +35,13 @@ proto_auth:
 	@echo Done!
 
 ## build_auth: builds auth binary
-build_auth:
+build_auth: proto_auth
 	@echo Building authentication binary...
 	cd auth-service && go build -o bin/${AUTH_BINARY} .
 	@echo Done!
 
-## start: starts the authApp
-start: build_auth
-	@echo Starting authApp
-	cd auth-service/bin && ${AUTH_BINARY}
 
+#3 ------------------------- Test commands -------------------------
 ## test_auth: runs auth tests
 test_auth:
 	@echo Running auth tests...
