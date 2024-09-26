@@ -28,4 +28,4 @@ jobs:
           go-version: 1.22
 
       - name: Run tests
-        run: go test -timeout 30s -v ./...
+        run: make test_all
