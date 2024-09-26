@@ -1,10 +1,10 @@
 package server
 
 import (
-	"authApp/cmd/jwt"
-	"authApp/cmd/user"
-	"authApp/db"
-	"authApp/proto"
+	"auth-service/api/jwt"
+	"auth-service/api/user"
+	"auth-service/postgres"
+	"auth-service/proto"
 	"fmt"
 	"log"
 	"net"
@@ -21,7 +21,7 @@ type Server struct {
 var gRPCPort string
 
 func NewServer() *Server {
-	db, err := db.Connect()
+	db, err := postgres.Connect()
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}

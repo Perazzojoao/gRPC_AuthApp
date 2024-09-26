@@ -1,9 +1,9 @@
 package user
 
 import (
-	"authApp/cmd/user/dto"
-	"authApp/models"
-	"authApp/util"
+	"auth-service/api/user/dto"
+	"auth-service/postgres/models"
+	"auth-service/util"
 	"errors"
 	"log"
 

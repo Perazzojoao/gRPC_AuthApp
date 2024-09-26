@@ -1,7 +1,7 @@
 package util
 
 import (
-	"authApp/models"
+	"auth-service/postgres/models"
 	"errors"
 	"os"
 	"time"

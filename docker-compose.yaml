@@ -1,9 +1,11 @@
 version: '3.8'
 name: auth_app
 services:
-  server:
-    build: .
-    container_name: auth-server
+  auth-service:
+    build:
+      context: ./auth-service/.
+      dockerfile: auth-service.Dockerfile
+    container_name: auth-service
     env_file:
       - .env
     environment:
@@ -11,32 +13,37 @@ services:
     ports:
       - 8000:8000
     networks:
-      - postgres_auth
+      - authApp
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
 
   postgres:
-    image: "postgres"
+    container_name: postgres
+    image: 'postgres'
     env_file:
       - .env
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "5432:5432"
     networks:
-      - postgres_auth
+      - authApp
     volumes:
-      - ./db/postgres-data:/var/lib/postgresql/data
+      - ./auth-service/postgres/postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER}']
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   pgadmin:
+    container_name: pgadmin
     image: dpage/pgadmin4
     env_file:
       - .env
@@ -44,15 +51,17 @@ services:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     ports:
-      - "54321:80"
+      - '54321:80'
     networks:
-      - postgres_auth
+      - authApp
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
 
 networks:
-  postgres_auth:
+  authApp:
+    name: authApp-Network
     driver: bridge
 
 volumes:

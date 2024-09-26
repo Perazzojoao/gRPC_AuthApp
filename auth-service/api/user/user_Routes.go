@@ -1,9 +1,9 @@
 package user
 
 import (
-	"authApp/cmd/jwt"
-	"authApp/cmd/user/dto"
-	"authApp/proto"
+	"auth-service/api/jwt"
+	"auth-service/api/user/dto"
+	"auth-service/proto"
 	"context"
 
 	"google.golang.org/grpc/codes"

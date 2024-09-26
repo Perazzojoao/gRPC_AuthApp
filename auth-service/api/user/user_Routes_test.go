@@ -1,10 +1,10 @@
 package user
 
 import (
-	"authApp/client"
-	"authApp/cmd/jwt"
-	postgres "authApp/db"
-	"authApp/proto"
+	"auth-service/api/jwt"
+	"auth-service/client"
+	"auth-service/postgres"
+	"auth-service/proto"
 	"context"
 	"log"
 	"net"
@@ -63,9 +63,9 @@ func TestAuthService(t *testing.T) {
 	authClient = proto.NewAuthServiceClient(conn)
 
 	// --- Tests ---
-	t.Run("Create User", TestCreateUser)
+	CreateUserTest(t)
 
-	t.Run("Login User", TestLoginUser)
+	LoginUserTest(t)
 
-	t.Run("Parse JWT", TestJwtParse)
+	JwtParseTest(t)
 }
