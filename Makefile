@@ -1,4 +1,5 @@
-AUTH_BINARY=authApp.exe
+AUTH_BINARY=authService.exe
+MAIL_BINARY=mailService.exe
 
 #1 ------------------------- Docker commands -------------------------
 ## up: starts all containers in the background without forcing build
@@ -35,13 +36,39 @@ proto_auth:
 	@echo Done!
 
 ## build_auth: builds auth binary
-build_auth: proto_auth
+build_auth:
 	@echo Building authentication binary...
 	cd auth-service && go build -o bin/${AUTH_BINARY} .
 	@echo Done!
 
+## run_auth: runs auth binary
+run_auth: build_auth
+	@echo Running authentication binary...
+	cd auth-service/bin && ${AUTH_BINARY}
+	@echo Done!
 
-#3 ------------------------- Test commands -------------------------
+
+#3 ------------------------- Mail build commands -------------------------
+## proto_mail: generates mail proto files
+proto_mail:
+	@echo Generating mail proto...
+	cd mail-service && protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/server.proto
+	@echo Done!
+
+## build_mail: builds mail binary
+build_mail:
+	@echo Building mail binary...
+	cd mail-service && go build -o bin/${MAIL_BINARY} .
+	@echo Done!
+
+## run_mail: runs mail binary
+run_mail: build_mail
+	@echo Running mail binary...
+	cd mail-service/bin && ${MAIL_BINARY}
+	@echo Done!
+
+
+#4 ------------------------- Test commands -------------------------
 ## test_auth: runs auth tests
 test_auth:
 	@echo Running auth tests...

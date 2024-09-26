@@ -2,10 +2,10 @@ version: '3.8'
 name: auth_app
 services:
   auth-service:
+    container_name: auth-service
     build:
       context: ./auth-service/.
       dockerfile: auth-service.Dockerfile
-    container_name: auth-service
     env_file:
       - .env
     environment:
@@ -17,6 +17,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      
+  mail-service:
+    container_name: mail-service
+    build:
+      context: ./mail-service/.
+      dockerfile: mail-service.Dockerfile
+    ports:
+      - 8001:8000
+    networks:
+      - authApp
     restart: unless-stopped
     deploy:
       mode: replicated
