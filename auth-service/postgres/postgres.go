@@ -1,7 +1,7 @@
-package db
+package postgres
 
 import (
-	"authApp/models"
+	"auth-service/postgres/models"
 	"fmt"
 	"log"
 	"math"

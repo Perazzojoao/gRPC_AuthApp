@@ -1,9 +1,8 @@
 package jwt
 
 import (
-	"authApp/models"
-	"authApp/util"
-	"errors"
+	"auth-service/postgres/models"
+	"auth-service/util"
 	"fmt"
 	"time"
 
@@ -25,8 +24,7 @@ func NewJwtHandler(db *gorm.DB) *JwtHandler {
 func (j *JwtHandler) GenerateToken(user *models.User) (string, error) {
 	token, err := util.GenerateToken(user)
 	if err != nil {
-		newError := errors.New(fmt.Sprintf("could not generate token: %v", err))
-		return "", newError
+		return "", fmt.Errorf("could not generate token: %v", err)
 	}
 	return token, nil
 }
