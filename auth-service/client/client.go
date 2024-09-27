@@ -12,7 +12,7 @@ import (
 )
 
 func NewGrpcConnection() *grpc.ClientConn {
-	serverUrl := fmt.Sprintf("localhost:%s", os.Getenv("GRPC_PORT"))
+	serverUrl := fmt.Sprintf("localhost:%s", os.Getenv("GRPC_AUTH_PORT"))
 
 	conn, err := grpc.NewClient(serverUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -23,7 +23,7 @@ func NewGrpcConnection() *grpc.ClientConn {
 }
 
 func NewTestingGrpcConnection(dialer func(context.Context, string) (net.Conn, error)) *grpc.ClientConn {
-	serverUrl := fmt.Sprintf("localhost:%s", os.Getenv("GRPC_PORT"))
+	serverUrl := fmt.Sprintf("localhost:%s", os.Getenv("GRPC_AUTH_PORT"))
 
 	conn, err := grpc.NewClient(serverUrl, grpc.WithContextDialer(dialer), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
