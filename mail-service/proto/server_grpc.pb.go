@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MailService_SendMail_FullMethodName = "/proto.MailService/SendMail"
+	MailService_SendVerificationCodeMail_FullMethodName = "/proto.MailService/SendVerificationCodeMail"
+	MailService_SendResetPasswordMail_FullMethodName    = "/proto.MailService/SendResetPasswordMail"
 )
 
 // MailServiceClient is the client API for MailService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MailServiceClient interface {
-	SendMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error)
+	SendVerificationCodeMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error)
+	SendResetPasswordMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error)
 }
 
 type mailServiceClient struct {
@@ -37,10 +39,20 @@ func NewMailServiceClient(cc grpc.ClientConnInterface) MailServiceClient {
 	return &mailServiceClient{cc}
 }
 
-func (c *mailServiceClient) SendMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error) {
+func (c *mailServiceClient) SendVerificationCodeMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MailResponse)
-	err := c.cc.Invoke(ctx, MailService_SendMail_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, MailService_SendVerificationCodeMail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mailServiceClient) SendResetPasswordMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MailResponse)
+	err := c.cc.Invoke(ctx, MailService_SendResetPasswordMail_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +63,8 @@ func (c *mailServiceClient) SendMail(ctx context.Context, in *MailRequest, opts 
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility.
 type MailServiceServer interface {
-	SendMail(context.Context, *MailRequest) (*MailResponse, error)
+	SendVerificationCodeMail(context.Context, *MailRequest) (*MailResponse, error)
+	SendResetPasswordMail(context.Context, *MailRequest) (*MailResponse, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -62,8 +75,11 @@ type MailServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedMailServiceServer struct{}
 
-func (UnimplementedMailServiceServer) SendMail(context.Context, *MailRequest) (*MailResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendMail not implemented")
+func (UnimplementedMailServiceServer) SendVerificationCodeMail(context.Context, *MailRequest) (*MailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendVerificationCodeMail not implemented")
+}
+func (UnimplementedMailServiceServer) SendResetPasswordMail(context.Context, *MailRequest) (*MailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendResetPasswordMail not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 func (UnimplementedMailServiceServer) testEmbeddedByValue()                     {}
@@ -86,20 +102,38 @@ func RegisterMailServiceServer(s grpc.ServiceRegistrar, srv MailServiceServer) {
 	s.RegisterService(&MailService_ServiceDesc, srv)
 }
 
-func _MailService_SendMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MailService_SendVerificationCodeMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MailServiceServer).SendMail(ctx, in)
+		return srv.(MailServiceServer).SendVerificationCodeMail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MailService_SendMail_FullMethodName,
+		FullMethod: MailService_SendVerificationCodeMail_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MailServiceServer).SendMail(ctx, req.(*MailRequest))
+		return srv.(MailServiceServer).SendVerificationCodeMail(ctx, req.(*MailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MailService_SendResetPasswordMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).SendResetPasswordMail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MailService_SendResetPasswordMail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).SendResetPasswordMail(ctx, req.(*MailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +146,12 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MailServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendMail",
-			Handler:    _MailService_SendMail_Handler,
+			MethodName: "SendVerificationCodeMail",
+			Handler:    _MailService_SendVerificationCodeMail_Handler,
+		},
+		{
+			MethodName: "SendResetPasswordMail",
+			Handler:    _MailService_SendResetPasswordMail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

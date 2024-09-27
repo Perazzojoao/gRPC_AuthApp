@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"log"
 	"mail-service/api"
+	"mail-service/api/handlers"
 	"mail-service/proto"
 	"net"
+	"os"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )
 
@@ -17,7 +20,8 @@ func NewServer() *Server {
 }
 
 func (srv *Server) GrpcListen() {
-	gRPCPort := "8000"
+	godotenv.Load()
+	gRPCPort := os.Getenv("GRPC_MAIL_PORT")
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gRPCPort))
 	if err != nil {
@@ -26,7 +30,9 @@ func (srv *Server) GrpcListen() {
 	defer listen.Close()
 
 	s := grpc.NewServer()
-	proto.RegisterMailServiceServer(s, &api.MailService{})
+	proto.RegisterMailServiceServer(s, &api.MailService{
+		MailHandler: handlers.NewMailHandler(),
+	})
 	log.Println("gRPC server started on port ", gRPCPort)
 
 	if err := s.Serve(listen); err != nil {

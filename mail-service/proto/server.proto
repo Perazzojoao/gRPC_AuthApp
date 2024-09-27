@@ -5,7 +5,8 @@ option go_package = "mail-service/proto";
 package proto;
 
 service MailService {
-    rpc SendMail(MailRequest) returns (MailResponse) {}
+    rpc SendVerificationCodeMail(MailRequest) returns (MailResponse) {}
+    rpc SendResetPasswordMail(MailRequest) returns (MailResponse) {}
 }
 
 message MailRequest {
