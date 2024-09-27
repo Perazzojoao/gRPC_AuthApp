@@ -34,7 +34,30 @@ const (
 	ResetPassword    = "reset_password"
 )
 
-func (msg *Message) SendGomail(about string) error {
+func (msg *Message) SendGomailPlainText() error {
+	msg.From = user
+	msg.DataMap = map[string]any{
+		"message": msg.Data,
+	}
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", msg.From)
+	m.SetHeader("To", msg.To)
+	m.SetHeader("Subject", msg.Subject)
+	m.SetBody("text/html", fmt.Sprintf("%v", msg.Data))
+
+	d := gomail.NewDialer(fmt.Sprintf("smtp.%s", domain), 587, user, password)
+
+	// Send the email to Bob, Cora and Dan.
+	if err := d.DialAndSend(m); err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func (msg *Message) SendGomailWithTemplate(about string) error {
 	msg.From = user
 	msg.DataMap = map[string]any{
 		"message": msg.Data,

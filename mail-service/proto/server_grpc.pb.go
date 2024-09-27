@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	MailService_SendVerificationCodeMail_FullMethodName = "/proto.MailService/SendVerificationCodeMail"
 	MailService_SendResetPasswordMail_FullMethodName    = "/proto.MailService/SendResetPasswordMail"
+	MailService_SendPlainTextMail_FullMethodName        = "/proto.MailService/SendPlainTextMail"
 )
 
 // MailServiceClient is the client API for MailService service.
@@ -29,6 +30,7 @@ const (
 type MailServiceClient interface {
 	SendVerificationCodeMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error)
 	SendResetPasswordMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error)
+	SendPlainTextMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error)
 }
 
 type mailServiceClient struct {
@@ -59,12 +61,23 @@ func (c *mailServiceClient) SendResetPasswordMail(ctx context.Context, in *MailR
 	return out, nil
 }
 
+func (c *mailServiceClient) SendPlainTextMail(ctx context.Context, in *MailRequest, opts ...grpc.CallOption) (*MailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MailResponse)
+	err := c.cc.Invoke(ctx, MailService_SendPlainTextMail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MailServiceServer is the server API for MailService service.
 // All implementations must embed UnimplementedMailServiceServer
 // for forward compatibility.
 type MailServiceServer interface {
 	SendVerificationCodeMail(context.Context, *MailRequest) (*MailResponse, error)
 	SendResetPasswordMail(context.Context, *MailRequest) (*MailResponse, error)
+	SendPlainTextMail(context.Context, *MailRequest) (*MailResponse, error)
 	mustEmbedUnimplementedMailServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedMailServiceServer) SendVerificationCodeMail(context.Context, 
 }
 func (UnimplementedMailServiceServer) SendResetPasswordMail(context.Context, *MailRequest) (*MailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendResetPasswordMail not implemented")
+}
+func (UnimplementedMailServiceServer) SendPlainTextMail(context.Context, *MailRequest) (*MailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPlainTextMail not implemented")
 }
 func (UnimplementedMailServiceServer) mustEmbedUnimplementedMailServiceServer() {}
 func (UnimplementedMailServiceServer) testEmbeddedByValue()                     {}
@@ -138,6 +154,24 @@ func _MailService_SendResetPasswordMail_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MailService_SendPlainTextMail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MailServiceServer).SendPlainTextMail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MailService_SendPlainTextMail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MailServiceServer).SendPlainTextMail(ctx, req.(*MailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MailService_ServiceDesc is the grpc.ServiceDesc for MailService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var MailService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendResetPasswordMail",
 			Handler:    _MailService_SendResetPasswordMail_Handler,
+		},
+		{
+			MethodName: "SendPlainTextMail",
+			Handler:    _MailService_SendPlainTextMail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

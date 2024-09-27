@@ -7,6 +7,7 @@ package proto;
 service MailService {
     rpc SendVerificationCodeMail(MailRequest) returns (MailResponse) {}
     rpc SendResetPasswordMail(MailRequest) returns (MailResponse) {}
+    rpc SendPlainTextMail(MailRequest) returns (MailResponse) {}
 }
 
 message MailRequest {

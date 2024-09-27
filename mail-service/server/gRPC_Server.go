@@ -20,7 +20,7 @@ func NewServer() *Server {
 }
 
 func (srv *Server) GrpcListen() {
-	godotenv.Load()
+	err := godotenv.Load()
 	gRPCPort := os.Getenv("GRPC_MAIL_PORT")
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", gRPCPort))

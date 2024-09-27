@@ -38,3 +38,13 @@ func (s *MailService) SendResetPasswordMail(ctx context.Context, req *proto.Mail
 		Message: successMsg,
 	}, nil
 }
+
+func (s *MailService) SendPlainTextMail(ctx context.Context, req *proto.MailRequest) (*proto.MailResponse, error) {
+	err := s.MailHandler.SendPlainTextMail(req)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, errorMsg)
+	}
+	return &proto.MailResponse{
+		Message: successMsg,
+	}, nil
+}
