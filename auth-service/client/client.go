@@ -11,8 +11,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func NewGrpcConnection() *grpc.ClientConn {
+func NewGrpcConnection(url ...string) *grpc.ClientConn {
 	serverUrl := fmt.Sprintf("localhost:%s", os.Getenv("GRPC_AUTH_PORT"))
+	if len(url) > 0 {
+		serverUrl = url[0]
+	}
 
 	conn, err := grpc.NewClient(serverUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -22,8 +25,11 @@ func NewGrpcConnection() *grpc.ClientConn {
 	return conn
 }
 
-func NewTestingGrpcConnection(dialer func(context.Context, string) (net.Conn, error)) *grpc.ClientConn {
+func NewTestingGrpcConnection(dialer func(context.Context, string) (net.Conn, error), url ...string) *grpc.ClientConn {
 	serverUrl := fmt.Sprintf("localhost:%s", os.Getenv("GRPC_AUTH_PORT"))
+	if len(url) > 0 {
+		serverUrl = url[0]
+	}
 
 	conn, err := grpc.NewClient(serverUrl, grpc.WithContextDialer(dialer), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
