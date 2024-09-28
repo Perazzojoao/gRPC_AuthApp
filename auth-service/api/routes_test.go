@@ -38,7 +38,7 @@ func TestAuthService(t *testing.T) {
 	// -----------------------
 
 	asc := AuthService{
-		UserHandlers: handlers.NewUserHandlers(db),
+		UserHandlers: handlers.NewUserHandlers(db, handlers.NewMailHandler()),
 		JwtHandler:   handlers.NewJwtHandler(db),
 	}
 	proto.RegisterAuthServiceServer(srv, &asc)

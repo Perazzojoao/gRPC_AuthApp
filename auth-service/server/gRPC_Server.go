@@ -37,7 +37,7 @@ func (app *Server) GrpcListen() {
 
 	s := grpc.NewServer()
 	proto.RegisterAuthServiceServer(s, &api.AuthService{
-		UserHandlers: handlers.NewUserHandlers(app.DB),
+		UserHandlers: handlers.NewUserHandlers(app.DB, handlers.NewMailHandler()),
 		JwtHandler:   handlers.NewJwtHandler(app.DB),
 	})
 	log.Println("gRPC server started on port ", gRPCPort)
