@@ -32,9 +32,23 @@ message Jwt {
   string token = 1;
 }
 
+message VerificationCodeRequest {
+  string code = 1;
+  string userId = 2;
+}
+
+message ResendVerificationCodeRequest {
+  string email = 1;
+}
+
+message ResendVerificationCodeResponse {
+  string message = 1;
+}
 
 service AuthService {
-  rpc CreateUser(UserRequest) returns (UserResponse);
+  rpc CreateUser(UserRequest) returns (User);
   rpc ValidateUser(UserRequest) returns (UserValidated);
   rpc JwtParse(Jwt) returns (User);
+  rpc ActivateUser(VerificationCodeRequest) returns (UserResponse);
+  rpc ResendVerificationCode(ResendVerificationCodeRequest) returns (ResendVerificationCodeResponse);
 }

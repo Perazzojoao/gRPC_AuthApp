@@ -21,11 +21,11 @@ type VerificationCode struct {
 func (code *VerificationCode) BeforeCreate(tx *gorm.DB) (err error) {
 	// UUID version 4
 	code.ID = uuid.New()
-	code.Code = strconv.Itoa(int(generateVerifyCode()))
+	code.Code = strconv.Itoa(int(GenerateVerifyCode()))
 	return
 }
 
-func generateVerifyCode() uint {
+func GenerateVerifyCode() uint {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return uint(r.Intn(900000) + 100000)
 }

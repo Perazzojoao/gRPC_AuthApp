@@ -72,6 +72,8 @@ services:
       - '54321:80'
     networks:
       - authApp
+    volumes:
+      - ./auth-service/postgres/pgadmin-data:/var/lib/pgadmin/data
     depends_on:
       postgres:
         condition: service_healthy

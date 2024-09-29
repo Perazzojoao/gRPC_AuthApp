@@ -99,7 +99,7 @@ func LoginUserTest(authClient proto.AuthServiceClient, t *testing.T) *proto.User
 				name:    "Test 4",
 				payload: &proto.UserRequest{Email: "test@gmail.com", Password: "password"},
 				wantErr: false,
-				expect:  codes.OK,
+				expect:  codes.PermissionDenied,
 			},
 		}
 

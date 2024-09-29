@@ -7,8 +7,8 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strconv"
 
-	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -80,19 +80,46 @@ func (u *UserHandlers) ValidateUser(user *dto.RequestUserDto) (*models.User, err
 	return &newUser, nil
 }
 
-func (u *UserHandlers) ActivateUser(verifyCode string, userId uuid.UUID) error {
+func (u *UserHandlers) ActivateUser(verifyCode string, userId string) (*models.User, error) {
 	code := models.VerificationCode{}
 	result := u.db.First(&code, "code = ? AND user_id = ?", verifyCode, userId)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	if result.Error != nil {
+		log.Println("error finding verification code: ", result.Error)
+		return nil, status.Error(codes.NotFound, "verification code not found")
+	}
+
+	user := models.User{}
+	result = u.db.Model(&user).Where("id = ?", userId).Update("active", true).First(&user)
+	if result.Error != nil {
+		log.Println("error updating user: ", result.Error)
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	return &user, nil
+}
+
+func (u *UserHandlers) ResendVerificationCode(email string) error {
+	user := models.User{}
+	result := u.db.First(&user, "email = ?", email)
+	if result.Error != nil {
+		log.Println("error finding user: ", result.Error)
+		return status.Error(codes.NotFound, "user not found")
+	}
+
+	code := models.VerificationCode{Code: strconv.Itoa(int(models.GenerateVerifyCode()))}
+	result = u.db.Model(&code).Where("user_id = ?", user.Id).Update("code", code.Code)
+	if result.Error != nil {
 		log.Println("error finding verification code: ", result.Error)
 		return status.Error(codes.NotFound, "verification code not found")
 	}
 
-	result = u.db.Model(&models.User{}).Where("id = ?", userId).Update("is_active", true)
-	if result.Error != nil {
-		log.Println("error updating user: ", result.Error)
-		return status.Error(codes.Internal, "internal error")
+	msg := MailMessage{
+		To:      user.Email,
+		Subject: "Verify your email",
+		Body:    "Your verification code is " + code.Code,
 	}
+	ctx := context.Background()
+	go u.MailHandler.SendPlainTextMail(ctx, msg)
 
 	return nil
 }
