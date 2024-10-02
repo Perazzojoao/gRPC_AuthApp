@@ -6,9 +6,12 @@ import (
 	"auth-service/util"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -120,6 +123,70 @@ func (u *UserHandlers) ResendVerificationCode(email string) error {
 	}
 	ctx := context.Background()
 	go u.MailHandler.SendPlainTextMail(ctx, msg)
+
+	return nil
+}
+
+func (u *UserHandlers) ResetPassword(email, password string) error {
+	hashedPassword, err := util.GenerateHash(password)
+	if err != nil {
+		log.Println("error hashing password: ", err)
+		return status.Error(codes.Internal, "internal error")
+	}
+
+	result := u.db.Model(&models.User{}).Where("email = ?", email).Update("password", hashedPassword)
+	if result.Error != nil {
+		log.Println("error updating password: ", result.Error)
+		return status.Error(codes.Internal, "internal error")
+	}
+
+	return nil
+}
+
+func (u *UserHandlers) SendResetPasswordEmail(frontUrl, email string) error {
+	user := models.User{}
+	result := u.db.First(&user, "email = ?", email)
+	if result.Error != nil {
+		log.Println("error finding user: ", result.Error)
+		return status.Error(codes.NotFound, "user not found")
+	}
+
+	token, err := util.GenerateToken(&user, "reset_password")
+	if err != nil {
+		log.Println("error generating token: ", err)
+		return status.Error(codes.Internal, "internal error")
+	}
+
+	tokenChanel := make(chan *jwt.Token)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	go func() {
+		defer close(tokenChanel)
+		parsedT, err := util.ParseToken(token, "reset_password")
+		if err != nil {
+			log.Println("error parsing token: ", err)
+		}
+		tokenChanel <- parsedT
+	}()
+
+	var parsedToken *jwt.Token
+
+	select {
+	case <-ctx.Done():
+		log.Println("error parsing token: ", ctx.Err())
+	case parsedToken = <-tokenChanel:
+	}
+
+	claims := parsedToken.Claims.(jwt.MapClaims)
+	exp := claims["exp"].(float64)
+
+	msg := MailMessage{
+		To:      user.Email,
+		Subject: "Reset your password",
+		Body:    "Click this link to reset your password!\n" + frontUrl + fmt.Sprintf("?exp=%ftoken=%s", exp, token),
+	}
+	context := context.Background()
+	go u.MailHandler.SendPlainTextMail(context, msg)
 
 	return nil
 }

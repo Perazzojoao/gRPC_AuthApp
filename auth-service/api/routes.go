@@ -112,3 +112,30 @@ func (u *AuthService) JwtParse(ctx context.Context, req *proto.Jwt) (*proto.User
 		UpdatedAt: user.UpdatedAt.String(),
 	}, nil
 }
+
+func (u *AuthService) ResetPassword(ctx context.Context, req *proto.ResetPasswordRequest) (*proto.ResetPasswordResponse, error) {
+	_, err := u.JwtHandler.ParseToken(req.Token, "reset_password")
+	if err != nil {
+		return &proto.ResetPasswordResponse{}, err
+	}
+
+	err = u.UserHandlers.ResetPassword(req.Email, req.Password)
+	if err != nil {
+		return &proto.ResetPasswordResponse{}, err
+	}
+
+	return &proto.ResetPasswordResponse{
+		Message: "Password reset successfully!",
+	}, nil
+}
+
+func (u *AuthService) SendResetPassword(ctx context.Context, req *proto.SendResetPasswordRequest) (*proto.SendResetPasswordResponse, error) {
+	err := u.UserHandlers.SendResetPasswordEmail(req.FrontBaseUrl, req.Email)
+	if err != nil {
+		return &proto.SendResetPasswordResponse{}, err
+	}
+
+	return &proto.SendResetPasswordResponse{
+		Message: "Reset password email sent!",
+	}, nil
+}

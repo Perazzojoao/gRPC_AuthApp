@@ -24,6 +24,8 @@ const (
 	AuthService_JwtParse_FullMethodName               = "/proto.AuthService/JwtParse"
 	AuthService_ActivateUser_FullMethodName           = "/proto.AuthService/ActivateUser"
 	AuthService_ResendVerificationCode_FullMethodName = "/proto.AuthService/ResendVerificationCode"
+	AuthService_SendResetPassword_FullMethodName      = "/proto.AuthService/SendResetPassword"
+	AuthService_ResetPassword_FullMethodName          = "/proto.AuthService/ResetPassword"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -35,6 +37,8 @@ type AuthServiceClient interface {
 	JwtParse(ctx context.Context, in *Jwt, opts ...grpc.CallOption) (*User, error)
 	ActivateUser(ctx context.Context, in *VerificationCodeRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	ResendVerificationCode(ctx context.Context, in *ResendVerificationCodeRequest, opts ...grpc.CallOption) (*ResendVerificationCodeResponse, error)
+	SendResetPassword(ctx context.Context, in *SendResetPasswordRequest, opts ...grpc.CallOption) (*SendResetPasswordResponse, error)
+	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error)
 }
 
 type authServiceClient struct {
@@ -95,6 +99,26 @@ func (c *authServiceClient) ResendVerificationCode(ctx context.Context, in *Rese
 	return out, nil
 }
 
+func (c *authServiceClient) SendResetPassword(ctx context.Context, in *SendResetPasswordRequest, opts ...grpc.CallOption) (*SendResetPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendResetPasswordResponse)
+	err := c.cc.Invoke(ctx, AuthService_SendResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResetPasswordResponse)
+	err := c.cc.Invoke(ctx, AuthService_ResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -104,6 +128,8 @@ type AuthServiceServer interface {
 	JwtParse(context.Context, *Jwt) (*User, error)
 	ActivateUser(context.Context, *VerificationCodeRequest) (*UserResponse, error)
 	ResendVerificationCode(context.Context, *ResendVerificationCodeRequest) (*ResendVerificationCodeResponse, error)
+	SendResetPassword(context.Context, *SendResetPasswordRequest) (*SendResetPasswordResponse, error)
+	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -128,6 +154,12 @@ func (UnimplementedAuthServiceServer) ActivateUser(context.Context, *Verificatio
 }
 func (UnimplementedAuthServiceServer) ResendVerificationCode(context.Context, *ResendVerificationCodeRequest) (*ResendVerificationCodeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResendVerificationCode not implemented")
+}
+func (UnimplementedAuthServiceServer) SendResetPassword(context.Context, *SendResetPasswordRequest) (*SendResetPasswordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendResetPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +272,42 @@ func _AuthService_ResendVerificationCode_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_SendResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendResetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).SendResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_SendResetPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).SendResetPassword(ctx, req.(*SendResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ResetPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +334,14 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResendVerificationCode",
 			Handler:    _AuthService_ResendVerificationCode_Handler,
+		},
+		{
+			MethodName: "SendResetPassword",
+			Handler:    _AuthService_SendResetPassword_Handler,
+		},
+		{
+			MethodName: "ResetPassword",
+			Handler:    _AuthService_ResetPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
