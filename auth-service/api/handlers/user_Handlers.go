@@ -157,28 +157,27 @@ func (u *UserHandlers) SendResetPasswordEmail(frontUrl, email string) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 
-	tokenChanel := make(chan *jwt.Token)
+	expChan := make(chan float64)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	go func() {
-		defer close(tokenChanel)
-		parsedT, err := util.ParseToken(token, "reset_password")
+		defer close(expChan)
+		parsedToken, err := util.ParseToken(token, "reset_password")
 		if err != nil {
 			log.Println("error parsing token: ", err)
 		}
-		tokenChanel <- parsedT
+		claims := parsedToken.Claims.(jwt.MapClaims)
+		exp := claims["exp"].(float64)
+		expChan <- exp
 	}()
 
-	var parsedToken *jwt.Token
+	var exp float64
 
 	select {
 	case <-ctx.Done():
 		log.Println("error parsing token: ", ctx.Err())
-	case parsedToken = <-tokenChanel:
+	case exp = <-expChan:
 	}
-
-	claims := parsedToken.Claims.(jwt.MapClaims)
-	exp := claims["exp"].(float64)
 
 	msg := MailMessage{
 		To:      user.Email,

@@ -29,7 +29,7 @@ func (m *MailHandler) SendPlainTextMail(ctx context.Context, msg MailMessage) {
 	defer conn.Close()
 	mailClient := proto.NewMailServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(ctx, 12*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	resp := make(chan struct {
 		*proto.MailResponse
