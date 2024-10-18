@@ -42,7 +42,7 @@ func selectClaims(tokenType ...string) (string, time.Duration, error) {
 
 	if len(tokenType) == 0 {
 		key = "SECRET_KEY"
-		duration = 24 * 30
+		duration = 24
 		return key, duration, nil
 	}
 

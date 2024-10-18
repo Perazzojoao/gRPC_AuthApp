@@ -41,6 +41,12 @@ func Connect() (*gorm.DB, error) {
 			if !DB.Migrator().HasTable(usersModel) {
 				DB.Migrator().CreateTable(usersModel)
 			}
+
+			verificationCodeModel := &models.VerificationCode{}
+			if !DB.Migrator().HasTable(verificationCodeModel) {
+				DB.Migrator().CreateTable(verificationCodeModel)
+			}
+
 			connection = DB
 			break
 		}

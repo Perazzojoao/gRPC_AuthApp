@@ -29,8 +29,8 @@ func (j *JwtHandler) GenerateToken(user *models.User) (string, error) {
 	return token, nil
 }
 
-func (j *JwtHandler) ParseToken(tokenString string) (*models.User, error) {
-	token, err := util.ParseToken(tokenString)
+func (j *JwtHandler) ParseToken(tokenString string, tokenType ...string) (*models.User, error) {
+	token, err := util.ParseToken(tokenString, tokenType...)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, fmt.Sprintf("could not parse jwt token: %v", err))
 	}

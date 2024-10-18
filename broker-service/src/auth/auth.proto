@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "/proto";
+
+message UserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  bool active = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message UserResponse {
+  string token = 1;
+  User user = 2;
+}
+
+message UserValidated {
+  string token = 1;
+  string id = 2;
+  string email = 3;
+}
+
+message Jwt {
+  string token = 1;
+}
+
+message VerificationCodeRequest {
+  string code = 1;
+  string userId = 2;
+}
+
+message ResendVerificationCodeRequest {
+  string email = 1;
+}
+
+message ResendVerificationCodeResponse {
+  string message = 1;
+}
+
+message SendResetPasswordRequest {
+  string frontBaseUrl = 1;
+  string email = 2;
+}
+
+message SendResetPasswordResponse {
+  string message = 1;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string email = 2;
+  string password = 3;
+} 
+
+message ResetPasswordResponse {
+  string message = 1;
+}
+
+service AuthService {
+  rpc CreateUser(UserRequest) returns (User);
+  rpc ValidateUser(UserRequest) returns (UserValidated);
+  rpc JwtParse(Jwt) returns (User);
+  rpc ActivateUser(VerificationCodeRequest) returns (UserResponse);
+  rpc ResendVerificationCode(ResendVerificationCodeRequest) returns (ResendVerificationCodeResponse);
+  rpc SendResetPassword(SendResetPasswordRequest) returns (SendResetPasswordResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}

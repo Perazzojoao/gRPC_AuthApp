@@ -9,7 +9,7 @@ type RequestUserDto struct {
 	Password string `validate:"min=6"`
 }
 
-var validate = validator.New(validator.WithRequiredStructEnabled())
+var validateUser = validator.New(validator.WithRequiredStructEnabled())
 
 func NewRequestUserDto(email, password string) (*RequestUserDto, error) {
 	user := RequestUserDto{
@@ -25,5 +25,5 @@ func NewRequestUserDto(email, password string) (*RequestUserDto, error) {
 }
 
 func (u *RequestUserDto) Validate() error {
-	return validate.Struct(u)
+	return validateUser.Struct(u)
 }

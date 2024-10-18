@@ -19,7 +19,7 @@ var authClient proto.AuthServiceClient
 
 func TestAuthService(t *testing.T) {
 	// Load environment variables
-	os.Setenv("GRPC_PORT", "8000")
+	os.Setenv("GRPC_AUTH_PORT", "8000")
 
 	// --- Server Setup ---
 	lis := bufconn.Listen(1024 * 1024)
@@ -38,7 +38,7 @@ func TestAuthService(t *testing.T) {
 	// -----------------------
 
 	asc := AuthService{
-		UserHandlers: handlers.NewUserHandlers(db),
+		UserHandlers: handlers.NewUserHandlers(db, handlers.NewMailHandler()),
 		JwtHandler:   handlers.NewJwtHandler(db),
 	}
 	proto.RegisterAuthServiceServer(srv, &asc)

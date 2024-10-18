@@ -1,6 +1,24 @@
-version: '3.8'
 name: auth_app
 services:
+  broker-service:
+    container_name: broker-service
+    build:
+      context: ./broker-service/.
+      dockerfile: broker-service.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    networks:
+      - authApp
+    depends_on:
+      auth-service:
+        condition: service_started
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+
   auth-service:
     container_name: auth-service
     build:
@@ -17,6 +35,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mail-service:
+        condition: service_started
     restart: unless-stopped
     deploy:
       mode: replicated
@@ -27,6 +47,8 @@ services:
     build:
       context: ./mail-service/.
       dockerfile: mail-service.Dockerfile
+    env_file:
+      - .env
     ports:
       - 8001:8000
     networks:
@@ -68,9 +90,49 @@ services:
       - '54321:80'
     networks:
       - authApp
+    volumes:
+      - ./auth-service/postgres/pgadmin-data:/var/lib/pgadmin/data
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: docker.io/prom/prometheus:v2.54.1
+    container_name: prometheus
+    networks:
+      - authApp
+    command: "--config.file=/etc/prometheus/prometheus.yaml"
+    volumes:
+      - ./analysis/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - ./analysis/prometheus-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: docker.io/grafana/grafana-oss:11.2.2
+    container_name: grafana
+    networks:
+      - authApp
+    ports:
+      - "8002:3000"
+    volumes:
+      - ./analysis/grafana-data:/var/lib/grafana
+    restart: unless-stopped
+  
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.50.0
+    container_name: cadvisor
+    networks:
+      - authApp
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    privileged: true
     restart: unless-stopped
 
 networks:
@@ -80,3 +142,7 @@ networks:
 
 volumes:
   postgres:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
