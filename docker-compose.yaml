@@ -7,6 +7,8 @@ services:
       dockerfile: broker-service.Dockerfile
     env_file:
       - .env
+    environment:
+      - AUTH_SERVICE_URL=auth-service:8000
     ports:
       - 3000:3000
     networks:
