@@ -26,4 +26,4 @@ jobs:
       - name: Push Auth service image to Docker Hub
         run: |
           docker login -u perazzojoao -p ${{ secrets.DOCKER_HUB_TOKEN }}
-          docker push perazzojoao/auth-service:latest
+          docker push perazzojoao/auth_app-auth-service:latest
