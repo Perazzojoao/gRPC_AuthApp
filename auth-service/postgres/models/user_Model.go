@@ -8,10 +8,12 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID      `bson:"id" gorm:"type:uuid;primaryKey"`
+	Id        uuid.UUID      `bson:"id" gorm:"type:string;primaryKey"`
+	Name      string         `bson:"name" gorm:"not null"`
 	Email     string         `bson:"email" gorm:"unique;not null"`
 	Password  string         `bson:"password" gorm:"not null"`
-	Active    bool           `bson:"active" gorm:"default:false"`
+	Role      string         `bson:"role" gorm:"default:CLIENT"`
+	IsActive  bool           `bson:"is_active" gorm:"default:false"`
 	CreatedAt time.Time      `bson:"created_at"`
 	UpdatedAt time.Time      `bson:"updated_at"`
 	DeletedAt gorm.DeletedAt `bson:"deleted_at;omitempty" gorm:"index"`

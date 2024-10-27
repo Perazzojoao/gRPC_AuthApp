@@ -26,7 +26,7 @@ func NewUserHandlers(db *gorm.DB, mailHandler *MailHandler) *UserHandlers {
 	return &UserHandlers{db, mailHandler}
 }
 
-func (u *UserHandlers) CreateUser(user *dto.RequestUserDto) (*models.User, error) {
+func (u *UserHandlers) CreateUser(user *dto.CreateUserDto) (*models.User, error) {
 	newUser := models.User{Email: user.Email}
 	result := u.db.First(&newUser, "email = ?", user.Email)
 
@@ -35,6 +35,8 @@ func (u *UserHandlers) CreateUser(user *dto.RequestUserDto) (*models.User, error
 	}
 
 	var err error
+	newUser.Name = user.Name
+	newUser.Role = user.Role
 	newUser.Password, err = util.GenerateHash(user.Password)
 	if err != nil {
 		log.Println(err)
@@ -71,7 +73,7 @@ func (u *UserHandlers) ValidateUser(user *dto.RequestUserDto) (*models.User, err
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return &models.User{}, status.Error(codes.NotFound, "user not found")
 	}
-	if !newUser.Active {
+	if !newUser.IsActive {
 		return &models.User{}, status.Error(codes.PermissionDenied, "user not active")
 	}
 
@@ -92,7 +94,7 @@ func (u *UserHandlers) ActivateUser(verifyCode string, userId string) (*models.U
 	}
 
 	user := models.User{}
-	result = u.db.Model(&user).Where("id = ?", userId).Update("active", true).First(&user)
+	result = u.db.Model(&user).Where("id = ?", userId).Update("is_active", true).First(&user)
 	if result.Error != nil {
 		log.Println("error updating user: ", result.Error)
 		return nil, status.Error(codes.Internal, "internal error")

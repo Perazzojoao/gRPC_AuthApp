@@ -17,7 +17,7 @@ type AuthService struct {
 }
 
 func (u *AuthService) CreateUser(ctx context.Context, req *proto.UserRequest) (*proto.User, error) {
-	payload, err := dto.NewRequestUserDto(req.Email, req.Password)
+	payload, err := dto.NewCreateUserDto(req.Name, req.Email, req.Password, req.Role)
 	if err != nil {
 		return &proto.User{}, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -29,8 +29,10 @@ func (u *AuthService) CreateUser(ctx context.Context, req *proto.UserRequest) (*
 
 	return &proto.User{
 		Id:        newUser.Id.String(),
+		Name:      newUser.Name,
 		Email:     newUser.Email,
-		Active:    newUser.Active,
+		IsActive:  newUser.IsActive,
+		Role:      proto.Role(proto.Role_value[newUser.Role]),
 		CreatedAt: newUser.CreatedAt.String(),
 		UpdatedAt: newUser.UpdatedAt.String(),
 	}, nil
@@ -80,7 +82,7 @@ func (u *AuthService) ActivateUser(ctx context.Context, req *proto.VerificationC
 		User: &proto.User{
 			Id:        user.Id.String(),
 			Email:     user.Email,
-			Active:    user.Active,
+			IsActive:  user.IsActive,
 			CreatedAt: user.CreatedAt.String(),
 			UpdatedAt: user.UpdatedAt.String(),
 		},
@@ -107,7 +109,7 @@ func (u *AuthService) JwtParse(ctx context.Context, req *proto.Jwt) (*proto.User
 	return &proto.User{
 		Id:        user.Id.String(),
 		Email:     user.Email,
-		Active:    user.Active,
+		IsActive:  user.IsActive,
 		CreatedAt: user.CreatedAt.String(),
 		UpdatedAt: user.UpdatedAt.String(),
 	}, nil
