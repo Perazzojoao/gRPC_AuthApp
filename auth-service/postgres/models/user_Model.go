@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	Id        uuid.UUID      `bson:"id" gorm:"type:string;primaryKey"`
+	Id        uuid.UUID      `bson:"id" gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	Name      string         `bson:"name" gorm:"not null"`
 	Email     string         `bson:"email" gorm:"unique;not null"`
 	Password  string         `bson:"password" gorm:"not null"`
