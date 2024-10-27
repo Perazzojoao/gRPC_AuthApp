@@ -1,14 +1,23 @@
 import { Observable } from "rxjs"
 
+export enum Role {
+  ADMIN = 'ADMIN',
+  CLIENT = 'CLIENT'
+}
+
 export interface UserRequest {
+  name: string
   email: string
   password: string
+  role: Role
 }
 
 export interface User {
   id: string
+  name: string
   email: string
-  active: boolean
+  is_active: boolean
+  role: Role
   created_at: string
   updated_at: string
 }
