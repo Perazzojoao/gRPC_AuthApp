@@ -10,7 +10,7 @@ import (
 )
 
 type VerificationCode struct {
-	ID        uuid.UUID `bson:"id" gorm:"type:uuid;primaryKey"`
+	ID        uuid.UUID `bson:"id" gorm:"type:string;primaryKey"`
 	Code      string    `bson:"code" gorm:"not null"`
 	CreatedAt time.Time `bson:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at"`
