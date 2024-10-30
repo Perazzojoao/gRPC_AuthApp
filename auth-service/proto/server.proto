@@ -43,7 +43,7 @@ message Jwt {
 
 message VerificationCodeRequest {
   string code = 1;
-  string userId = 2;
+  string email = 2;
 }
 
 message ResendVerificationCodeRequest {

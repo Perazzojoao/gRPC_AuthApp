@@ -62,12 +62,12 @@ func (u *AuthService) ValidateUser(ctx context.Context, req *proto.UserRequest) 
 }
 
 func (u *AuthService) ActivateUser(ctx context.Context, req *proto.VerificationCodeRequest) (*proto.UserResponse, error) {
-	payload, err := dto.NewRequestVerificationCodeDto(req.UserId, req.Code)
+	payload, err := dto.NewRequestVerificationCodeDto(req.Email, req.Code)
 	if err != nil {
 		return &proto.UserResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	user, err := u.UserHandlers.ActivateUser(payload.Code, payload.Id)
+	user, err := u.UserHandlers.ActivateUser(payload.Code, payload.Email)
 	if err != nil {
 		return &proto.UserResponse{}, err
 	}
