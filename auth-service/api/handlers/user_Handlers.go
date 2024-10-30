@@ -93,6 +93,10 @@ func (u *UserHandlers) ActivateUser(verifyCode string, email string) (*models.Us
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
 
+	if user.IsActive {
+		return nil, status.Error(codes.InvalidArgument, "user already active")
+	}
+
 	code := models.VerificationCode{}
 	result := u.db.First(&code, "code = ? AND user_id = ?", verifyCode, user.Id)
 	if result.Error != nil {
