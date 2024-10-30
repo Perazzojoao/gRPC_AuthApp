@@ -85,16 +85,22 @@ func (u *UserHandlers) ValidateUser(user *dto.RequestUserDto) (*models.User, err
 	return &newUser, nil
 }
 
-func (u *UserHandlers) ActivateUser(verifyCode string, userId string) (*models.User, error) {
+func (u *UserHandlers) ActivateUser(verifyCode string, email string) (*models.User, error) {
+	user := models.User{}
+	resultUser := u.db.First(&user, "email = ?", email)
+	if resultUser.Error != nil {
+		log.Println("error finding user: ", resultUser.Error)
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
 	code := models.VerificationCode{}
-	result := u.db.First(&code, "code = ? AND user_id = ?", verifyCode, userId)
+	result := u.db.First(&code, "code = ? AND user_id = ?", verifyCode, user.Id)
 	if result.Error != nil {
 		log.Println("error finding verification code: ", result.Error)
 		return nil, status.Error(codes.NotFound, "verification code not found")
 	}
 
-	user := models.User{}
-	result = u.db.Model(&user).Where("id = ?", userId).Update("is_active", true).First(&user)
+	result = u.db.Model(&user).Where("email = ?", email).Update("is_active", true).First(&user)
 	if result.Error != nil {
 		log.Println("error updating user: ", result.Error)
 		return nil, status.Error(codes.Internal, "internal error")

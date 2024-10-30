@@ -3,16 +3,16 @@ package dto
 import "github.com/go-playground/validator/v10"
 
 type RequestVerificationCodeDto struct {
-	Code string `validate:"required"`
-	Id   string `validate:"required,uuid4"`
+	Code  string `validate:"required"`
+	Email string `validate:"required,email"`
 }
 
 var validateCode = validator.New(validator.WithRequiredStructEnabled())
 
-func NewRequestVerificationCodeDto(userId, code string) (*RequestVerificationCodeDto, error) {
+func NewRequestVerificationCodeDto(email, code string) (*RequestVerificationCodeDto, error) {
 	request := RequestVerificationCodeDto{
-		Id:   userId,
-		Code: code,
+		Email: email,
+		Code:  code,
 	}
 	err := request.Validate()
 	if err != nil {
